@@ -2,4 +2,8 @@
 .Rhistory
 .Rproj.user/
 Rplots.pdf
-*.Rproj
+
+# knitting leftovers
+*.log
+*.tex
+reports/*_files/

@@ -1,0 +1,237 @@
+---
+title: "Assignment"
+output:
+  html_document:
+    df_print: paged
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyr)
+library(ggplot2)
+library(here)
+```
+
+
+## Descriptive analyses
+### Raw dataset
+
+```{r}
+pd <- readRDS(here("data", "ProjectData_2324.rds"))
+summary(pd)
+```
+
+```{r}
+sum(duplicated(pd))
+```
+
+
+```{r}
+# check if all variables exist
+var <- c("Demqol_staff", "visit", "agecat", "marital3cat", "npi_symptoms_0", "chc_04")
+pd_demqol <- pd$Demqol_staff 
+pd_visit <- pd$visit
+pd_agecat <- pd$agecat
+pd_marital <- pd$marital3cat
+pd_symptoms <- pd$npi_symptoms_0
+pd_dementia <- pd$chc_04
+summary(pd_demqol)
+summary(pd_visit)
+summary(pd_agecat)
+summary(pd_marital)
+summary(pd_symptoms)
+summary(pd_dementia)
+```
+
+
+```{r}
+summary(pd_demqol)
+length(pd_demqol)
+sum(is.na(pd_demqol))
+boxplot(pd_demqol)
+hist(pd_demqol)
+ggplot(data.frame(x = pd_demqol), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15,
+                 fill = "grey85", colour = "white") +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```
+
+
+```{r}
+summary(pd_visit)
+length(pd_visit)
+sum(is.na(pd_visit))
+boxplot(pd_visit)
+hist(pd_visit)
+ggplot(data.frame(x = pd_visit), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15,
+                 fill = "grey85", colour = "white") +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```
+
+
+```{r}
+summary(pd_agecat)
+length(pd_agecat)
+sum(is.na(pd_agecat))
+boxplot(pd_agecat)
+hist(pd_agecat)
+ggplot(data.frame(x = pd_agecat), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15,
+                 fill = "grey85", colour = "white") +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```
+
+```{r}
+summary(pd_marital)
+length(pd_marital)
+sum(is.na(pd_marital))
+boxplot(pd_marital)
+hist(pd_marital)
+ggplot(data.frame(x = pd_marital), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15,
+                 fill = "grey85", colour = "white") +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```
+
+```{r}
+summary(pd_symptoms)
+length(pd_symptoms)
+sum(is.na(pd_symptoms))
+boxplot(pd_symptoms)
+hist(pd_symptoms)
+ggplot(data.frame(x = pd_symptoms), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15,
+                 fill = "grey85", colour = "white") +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```
+
+```{r}
+summary(pd_dementia)
+length(pd_dementia)
+sum(is.na(pd_dementia))
+boxplot(pd_dementia)
+hist(pd_dementia)
+ggplot(data.frame(x = pd_dementia), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15,
+                 fill = "grey85", colour = "white") +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```
+
+### Checking for impact of variable addition on the NAs
+
+```{r}
+var1 <- c("Demqol_staff", "visit")
+pd_select1 <- pd[var1]
+pd_clean1 <- drop_na(pd_select1)
+summary(pd_clean1)
+
+```
+
+
+
+### Complete case analysis
+
+```{r}
+pd_select <- pd[var]
+pd_clean <- drop_na(pd_select)
+summary(pd_clean)
+```
+
+
+```{r}
+pd_clean_demqol <- pd_clean$Demqol_staff
+pd_clean_visit <- pd_clean$visit
+pd_clean_agecat <- pd_clean$agecat
+pd_clean_marital <- pd_clean$marital3cat
+pd_clean_symptoms <- pd_clean$npi_symptoms_0
+pd_clean_dementia <- pd_clean$chc_04
+```
+
+### Version with factor
+
+```{r}
+# Dataset version with ordinal/categorical data converted into factors
+pd_copy <- pd_clean
+pd_copy$chc_04 <- as.factor(pd_clean$chc_04)
+pd_copy$marital3cat <- as.factor(pd_clean$marital3cat)
+pd_copy$agecat <- as.factor(pd_clean$agecat)
+pd_copy$visit <- as.factor(pd_clean$visit)
+```
+
+
+
+```{r}
+summary(pd_clean_demqol)
+length(pd_clean_demqol)
+sum(is.na(pd_clean_demqol))
+boxplot(pd_clean_demqol)
+hist(pd_clean_demqol)
+ggplot(data.frame(x = pd_clean_demqol), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 10,
+                 fill = "grey85", colour = "white", linewidth = 1) +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```
+
+
+```{r}
+summary(pd_clean_visit)
+length(pd_clean_visit)
+sum(is.na(pd_clean_visit))
+boxplot(pd_clean_visit)
+hist(pd_clean_visit)
+ggplot(data.frame(x = pd_clean_visit), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 10,
+                 fill = "grey85", colour = "white") +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```
+
+```{r}
+summary(pd_clean_agecat)
+length(pd_clean_agecat)
+sum(is.na(pd_clean_agecat))
+boxplot(pd_clean_agecat)
+hist(pd_clean_agecat)
+ggplot(data.frame(x = pd_clean_agecat), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15,
+                 fill = "grey85", colour = "white") +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```
+
+```{r}
+summary(pd_clean_marital)
+length(pd_clean_marital)
+sum(is.na(pd_clean_marital))
+boxplot(pd_clean_marital)
+hist(pd_clean_marital)
+ggplot(data.frame(x = pd_clean_marital), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15,
+                 fill = "grey85", colour = "white") +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```
+
+```{r}
+summary(pd_clean_symptoms)
+length(pd_clean_symptoms)
+sum(is.na(pd_clean_symptoms))
+boxplot(pd_clean_symptoms)
+hist(pd_clean_symptoms)
+ggplot(data.frame(x = pd_clean_symptoms), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15,
+                 fill = "grey85", colour = "white") +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```
+
+
+```{r}
+summary(pd_clean_dementia)
+length(pd_clean_dementia)
+sum(is.na(pd_clean_dementia))
+boxplot(pd_clean_dementia)
+hist(pd_clean_dementia)
+ggplot(data.frame(x = pd_clean_dementia), aes(x)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 15,
+                 fill = "grey85", colour = "white") +
+  geom_density(bw = "SJ", colour = "steelblue", linewidth = 1)
+```

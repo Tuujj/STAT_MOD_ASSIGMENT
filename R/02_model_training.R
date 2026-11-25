@@ -1,9 +1,10 @@
 # Setup
 library(lmtest)
 library(sandwich)
+library(here)
 
 # complete case analysis as agreed in the protocol: drop residents with any missing value => i do it here but maube cleaner in the data split sript?
-train <- readRDS("train.rds")
+train <- readRDS(here("R", "train.rds"))
 
 
 
@@ -81,4 +82,5 @@ results <- list(
             sigma = s$sigma, s$fstatistic)
 )
 
-saveRDS(results, "results.rds")
+saveRDS(m_final, here("R", "m_final.rds"))
+saveRDS(results, here("R", "results.rds"))

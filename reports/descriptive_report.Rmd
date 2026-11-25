@@ -1,0 +1,150 @@
+---
+title: "Descriptive Report"
+output: 
+  pdf_document:
+    latex_engine: pdflatex
+header-includes:
+  - \usepackage{booktabs}
+  - \usepackage{float}
+  - \usepackage{titling}
+  - \setlength{\droptitle}{-2.5cm}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(moments)
+library(patchwork)
+library(Hmisc)
+library(here)
+```
+
+```{r}
+pd <- readRDS(here("data", "ProjectData_2324.rds"))
+```
+
+
+```{r}
+# Conduct listwise Deletion
+var <- c("Demqol_staff", "visit", "agecat", "marital3cat", "npi_symptoms_0", "chc_04")
+pd_select <- pd[var]
+pd_clean <- drop_na(pd_select)
+```
+
+
+```{r}
+# Dataset version with ordinal/categorical data converted into factors
+pd_copy <- pd_clean
+pd_copy$chc_04 <- as.factor(pd_clean$chc_04)
+pd_copy$marital3cat <- as.factor(pd_clean$marital3cat)
+pd_copy$agecat <- as.factor(pd_clean$agecat)
+pd_copy$visit <- as.factor(pd_clean$visit)
+```
+
+We conducted listwise deletion on missing data. The variable with the most number of missing observations is the outcome variable (NA=471). After removing missing observations from the outcome variable and accounting for all the covariates, a further 27.8% decrease in the sample size is observed, making the reduction in total sample size around 48% (772/1486). Below you can find descriptive statistics on the variables of interest as well as appropriate graphs that show their respective distributions.
+
+```{=latex} 
+\begin{table}[!htbp] 
+\centering
+\caption{Descriptive statistics of variables in analysis ($N = 772$).}
+\label{tab: descriptive}
+
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lccc}
+\toprule
+& Mean/Proportion & Median(Q1, Q3) & SD \\
+\midrule
+
+\textbf{Outcome variable} & & & \\
+\quad Dementia Patients' Quality of Life at 8 Months & 103.2 & 106(98, 111) & 11.44 \\
+
+\textbf{Independent variables} & & & \\
+\quad Family Carer Cisits & & 2(1, 3) & \\
+\quad Age Category & & 4(1, 4) & \\
+\quad Marital Status - Widowed & 0.55 & & \\
+\quad Number of Neuropsychriatic Symptoms & 3.34 & 3(1, 5) & 2.42 \\
+\quad Dementia Specialist - yes & 0.43 & & \\
+
+\bottomrule
+\end{tabular*}
+\end{table}
+```
+
+It can be seen that skewness is present in the variables quality of life and neuropsychiatric symptoms, with the former having a skewness of -1.14 and the latter a skewness of 0.62. A Q-Q plot further confirms the former (see appendix). The categorical variable marital status also has uneven observations, with 55% of observations being from the widowed category.
+
+```{r}
+p1 <- ggplot(pd_copy, mapping = aes(x = Demqol_staff)) +
+         geom_histogram(aes( y = after_stat(density)),
+                             binwidth = 5, color="white") +
+          labs(x = "Dementia patients' quality of life") +
+          geom_density(color = "lightblue", linewidth = 0.7) +
+          theme(panel.background = element_blank())
+p2 <- ggplot(pd_copy, mapping = aes(y = visit)) +
+          geom_bar(just = 0.5, color="white") +
+          labs(x = "count", y = "number of carer visits") +
+          scale_y_discrete(
+            labels = c("< no visits","≤4.5", "<8.8", "<13.5", "13.5 or more"),
+            breaks = c("0", "1", "2", "3", "4")
+          )+
+            theme(panel.background = element_blank())
+p3 <- ggplot(pd_copy, mapping = aes(x = npi_symptoms_0)) +
+          geom_histogram(aes( y = after_stat(density)),
+                             binwidth = 1, color="white") +
+          labs(x = "Neuropsychiatric symptoms") +
+          geom_density(color = "lightblue", linewidth = 0.7) +
+          theme(panel.background = element_blank())
+p4 <- ggplot(pd_copy, mapping = aes(y = agecat)) +
+         geom_bar(just = 0.5, color="white") +
+          labs(x = "count", y = "age categories") +
+          scale_y_discrete(
+            labels = c("< 75","75-79", "80-84", "85-89", "90+"),
+            breaks = c("0", "1", "2", "3", "4")
+          ) +
+            theme(panel.background = element_blank())
+p5 <- ggplot(pd_copy, mapping = aes(y = marital3cat)) +
+         geom_bar(just = 0.5, color="white") +
+          labs(y = "Marital status", x = "count") +
+          scale_y_discrete(
+            labels = c("married/comm. law","single/sep./div.", "widowed"),
+            breaks = c("0", "1", "2")
+          ) +
+            theme(panel.background = element_blank())
+p6 <- ggplot(pd_copy, mapping = aes(x = chc_04)) +
+         geom_bar(just = 0.5, color="white") +
+          labs(x = "Dementia specialist") +
+          scale_x_discrete(
+            breaks = c("0", "1"),
+            labels = c("No", "Yes")) +
+            theme(panel.background = element_blank())
+(p1 | p2 | p3) / (p4 | p5 | p6)
+```
+
+
+## Appendix
+
+Appendix A: summary statistics calculations
+
+```{r, echo = TRUE, results = 'hide'}
+summary(pd_clean)
+summary(pd_copy)
+sapply(pd_clean[, c("Demqol_staff", "npi_symptoms_0")],
+            sd)
+skewness(pd_clean$Demqol_staff)
+skewness(pd_clean$npi_symptoms_0)
+```
+
+Appendix B: Q-Q Plot of the Outcome Variable
+
+```{r}
+qqnorm(pd_clean$Demqol_staff, pch = 1, frame = FALSE)
+qqline(pd_clean$Demqol_staff, col = "#3a86d4", lwd = 2)
+
+```
+
+Appendix C: Correlation Tests on Predictors
+```{r, echo = TRUE, results = 'hide'}
+correlation_test <-rcorr(as.matrix(pd_clean[, -1]), type = "spearman")
+correlation_test
+```
+
